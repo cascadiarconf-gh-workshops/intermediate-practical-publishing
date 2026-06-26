@@ -1,0 +1,1263 @@
+---
+title: "Intermediate GitHub Workshop"
+subtitle: "Practical Publishing with Quarto and GitHub Actions"
+format:
+  revealjs:
+    self-contained: true
+output-file: index.html
+---
+
+## Workshop Goals {.smaller}
+
+Today we will:
+
+-   Review the **GitHub Flow** using a practical project
+-   Create a personal repository from a **template repository**
+-   Customize and preview a **Quarto website**
+-   Manage changes with a **branch and pull request**
+-   Render the same deployable website files locally
+-   Publish automatically with **GitHub Actions and GitHub Pages artifacts**
+-   Compare artifact deployment with branch-based publishing
+
+> **Reminder:** Help each other, pair up, and ask questions as needed.<br> **Tip:** Keep these slides open in its own browser tab, you'll need them!
+
+## Workshop Schedule {.smaller}
+
+#### Hour 1
+
+1.  GitHub Flow review
+2.  Create your personal repository
+3.  Quarto documents and the starter website
+
+#### Hour 2
+
+4.  Create a branch and customize the site
+5.  Commit, push, and open a pull request
+
+#### Hour 3
+
+6.  Render locally
+7.  Publish with GitHub Actions and Pages
+8.  Inspect the workflow and deployment
+
+## What *Won't* Be Covered {.smaller}
+
+This is an **intermediate GitHub** workshop.
+
+We will not spend much time on:
+
+-   Introductory Git and GitHub terminology
+-   Complex Git commands or merge-conflict resolution
+-   Advanced Quarto design or custom styling with CSS/Sass
+-   Writing a GitHub Action from scratch
+-   Custom domains for your deployed website
+
+<br>
+
+## Before We Start {.smaller}
+
+You will need to:
+
+1.  Sign into [GitHub](https://github.com/login) ([2FA is required](https://docs.github.com/en/authentication/securing-your-account-with-two-factor-authentication-2fa/configuring-two-factor-authentication))
+2.  Send GitHub username to workshop host
+3.  Receive email invite & join [Cascadia R Conference - GitHub Workshops](https://github.com/cascadiarconf-gh-workshops)
+
+If you want to preview your website:
+
+-   [Git](https://git-scm.com/install/windows)
+-   [Quarto CLI](https://quarto.org/docs/get-started/) (bundled with RStudio/Positron)
+-   [RStudio](https://posit.co/downloads), [Positron](https://positron.posit.co/download.html), or [VS Code](https://code.visualstudio.com/download), etc.
+-   [GitHub Desktop](https://desktop.github.com/download/) (recommended) or another Git interface
+-   (Optional) [GitHub CLI](https://cli.github.com/)
+-   (Optional) [R](https://www.r-project.org/) to execute R code
+
+## GitHub Account and Organization Access {.smaller}
+
+Before continuing:
+
+1.  Sign in to the GitHub account you plan to use today, complete 2FA prompts
+2.  Accept the organization invitation (check your email)
+3.  Confirm you can open the workshop repositories
+    -   [cascadiarconf-gh-workshops/intermediate-practical-publishing](https://github.com/cascadiarconf-gh-workshops/intermediate-practical-publishing)
+
+    -   [cascadiarconf-gh-workshops/intermediate-portfolio-template](https://github.com/cascadiarconf-gh-workshops/intermediate-portfolio-template)
+4.  Please for the sake of my sanity, save your GitHub 2FA recovery codes somewhere secure i.e. in a password manager, not `admin_notes.txt` on your desktop
+
+## From GitHub
+
+::: callout-warning
+For security reasons, GitHub Support will [not be able to restore access to accounts](https://docs.github.com/en/site-policy/other-site-policies/github-account-recovery-policy) with two-factor authentication enabled if you lose your two-factor authentication credentials or lose access to your account recovery methods.
+:::
+
+::: callout-note
+If you cannot use any recovery methods, you have permanently lost access to your account. However, you can unlink an email address tied to the locked account. The unlinked email address can then be linked to a new or existing account. For more information, see [Unlinking your email address from a locked account](https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-personal-account-on-github/managing-your-personal-account/unlinking-your-email-address-from-a-locked-account)
+:::
+
+-   [Configure GitHub 2FA - GitHub Docs](https://docs.github.com/en/authentication/securing-your-account-with-two-factor-authentication-2fa/configuring-two-factor-authentication)
+-   [Recovering Your Account - GitHub Docs](https://docs.github.com/en/authentication/securing-your-account-with-two-factor-authentication-2fa/recovering-your-account-if-you-lose-your-2fa-credentials)
+
+## Check your local installations
+
+In your terminal, run the following one line at a time
+
+<br>
+
+#### For git
+``` shell
+git --version
+```
+
+<br>
+
+#### For Quarto
+
+``` shell
+quarto --version
+```
+
+<br>
+
+You should get a version number back for `git` and `quarto` if installed properly
+
+## Primary Resources {.smaller}
+
+#### Gifts from Skyler
+
+-   [GitHub Flow Video](https://youtu.be/ykDGsbeblOs)
+
+#### GitHub Docs
+
+-   [GitHub Flow](https://docs.github.com/en/get-started/using-github/github-flow)
+
+-   [Creating a repository from a template](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template)
+
+-   [Creating a pull request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request)
+
+-   [GitHub Actions Quickstart](https://docs.github.com/en/actions/get-started/quickstart)
+
+-   [Custom GitHub Pages workflows](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages)
+
+#### Quarto Docs
+
+-   [Quarto Websites](https://quarto.org/docs/websites/)
+-   [Quarto Gallery](https://quarto.org/docs/gallery/)
+-   [Publishing to GitHub Pages](https://quarto.org/docs/publishing/github-pages.html)
+
+# Hour 1
+
+GitHub Flow and a Local Quarto Website
+
+## GitHub Flow: High-Level Review
+
+<br>
+
+```{mermaid}
+%%| fig-width: 14
+%%| fig-align: center
+
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "fontSize": "22px",
+    "fontFamily": "Arial, sans-serif",
+    "primaryTextColor": "#263442",
+    "lineColor": "#64748b"
+  },
+  "flowchart": {
+    "curve": "linear",
+    "nodeSpacing": 25,
+    "rankSpacing": 35,
+    "padding": 18
+  }
+}}%%
+
+flowchart LR
+    A([Start on<br>main])
+    B[Create<br>Branch]
+    C[Commit a<br>Change]
+    D[Push<br>Branch]
+    E[Create &<br>Review PR]
+    F[Merge to<br>main]
+    G([Delete<br>Branch])
+
+    A --> B --> C --> D --> E --> F --> G
+
+    classDef endpoint fill:#e8f1f8,stroke:#337795,stroke-width:2px,color:#17394a;
+    classDef action fill:#f7f8fa,stroke:#7b8492,stroke-width:1.5px,color:#263442;
+    classDef merge fill:#e8f5ec,stroke:#3f7d54,stroke-width:2px,color:#21452d;
+
+    class A,G endpoint;
+    class B,C,D,E action;
+    class F merge;
+
+    linkStyle default stroke:#64748b,stroke-width:2px;
+```
+
+::: {.callout-tip appearance="simple"}
+**Commit this to Memory**: You'll probably use GitHub Flow a lot! It works great for solo and collaborative work on code or other text-based GitHub adventures like documentation, websites, and more.
+:::
+
+## Why Would I Branch in My Own Repo? {.smaller}
+
+<br>
+
+::: {.callout-tip appearance="simple"}
+Branching and using PRs can be useful even when you are the only contributor.
+:::
+
+<br>
+
+A branch gives you a temporary workspace where you can:
+
+-   Make related changes together
+-   Preview the complete change before publishing it
+-   Compare your work against `main`
+-   Use a PR as a quality-control checkpoint
+-   Preserve a readable record of why the site changed
+
+## Template, Fork, or Clone? {.smaller}
+
+<br>
+
+### Template
+
+Creates a **new repository** with the same starting files and directory structure.
+
+### Fork
+
+Creates a related copy intended to contribute changes back to the original repository.
+
+### Clone
+
+Downloads a repository to your computer and connects the local copy to its remote repository.
+
+<br>
+
+::: {.callout-note appearance="minimal"}
+Today we will **create from a template**, then **clone our new repository**.
+:::
+
+## Create Your Personal Repository {.smaller}
+
+Open the workshop template repository:
+
+::: {.callout-note appearance="minimal"}
+<https://github.com/cascadiarconf-gh-workshops/intermediate-portfolio-template>
+:::
+
+1.  Select **Use this template**
+2.  Select **Create a new repository**
+3.  Choose your **personal GitHub account** as the owner
+4.  Give the repository a meaningful name
+5.  Set the repository visibility to **Public**
+6.  Select **Create repository**
+
+::: {.callout-note appearance="simple"}
+GitHub Actions in public repositories are **FREE**. Private repositories have free usage limits depending on what tier plan you have.
+:::
+
+## Choose a Useful Repository Name {.smaller}
+
+Good examples:
+
+```text
+YOUR-USERNAME.github.io
+portfolio
+project-name-site
+```
+
+::: {.callout-tip appearance="simple"}
+A repository named YOUR-USERNAME.github.io becomes your account-level Pages site.
+
+`https://YOUR-USERNAME.github.io/`
+
+Other repository names become project sites, normally published at:
+
+`https://YOUR-USERNAME.github.io/REPOSITORY-NAME/`
+:::
+
+Bad Examples:
+
+```text
+github-intermediate-workshop
+_PYTHON-IS_BETTER
+SpOnGeBoB-cAsE
+```
+
+## Clone Your New Repository {.smaller}
+
+### GitHub Desktop
+
+1.  Select **Code** in your new repository
+2.  Select **Open with GitHub Desktop**
+3.  Choose a local folder
+4.  Select **Clone**
+
+### Terminal alternative
+
+``` shell
+git clone https://github.com/YOUR-USERNAME/YOUR-REPOSITORY.git
+cd YOUR-REPOSITORY
+```
+
+### Other clone demos
+
+Ask me!
+
+> Confirm that you cloned **your repository**, not the original template.
+
+## Meet the Starter Website
+
+<br>
+
+The template includes:
+
+```{.text code-line-numbers="1|2|3|4|5|6|7|8|9|2-9"}
+.
+├── _quarto.yml         # Project-level quarto config 
+├── index.qmd           # The home page of your site
+├── about.qmd           # A secondary page of your site
+├── projects.qmd        # A secondary page of your site
+├── images/             # Stay organized with image assets
+├── workflow-examples/  # Example/template GitHub Actions
+├── .gitignore          # Files to exclude from git tracking
+└── README.md           # A README for repo maintainers
+```
+
+- The source files are small, readable, and version controlled.
+- The rendered website will be generated later.
+
+## Quarto Documents
+
+Quarto documents usually use the `.qmd` extension.
+
+:::: {.r-stack style="width: 100%;"}
+::: {.fragment .fade-in-then-out data-fragment-index="0" style="width: 100%;"}
+A document can contain:
+
+-   YAML metadata
+-   Markdown text
+-   Links and images
+-   Tables and citations
+-   Optional executable R, Python, or Julia code
+:::
+
+::: {.fragment .fade-in data-fragment-index="1" style="width: 100%;"}
+Example:
+
+```{.text code-line-numbers="1-3|5-7"}
+---
+title: "About Me"
+---
+
+## Current work
+
+I use data to answer practical questions.
+```
+:::
+::::
+
+## What Does `_quarto.yml` Do? {.smaller}
+
+<br>
+
+::: {.callout-note appearance="simple"}
+`_quarto.yml` is a special shared YAML configuration file that is
+
+- Inherited by **all** .qmd files in a project
+- Uses some special YAML properties to organize your site
+- Page YAML defaults can be defined ONCE here, rather than in every `.qmd` file
+- `.qmd` YAML still overrides `_quarto.yml` when needed
+:::
+
+<br>
+
+::: {.callout-tip appearance="simple"}
+YAML indentation matters. Use spaces, not tabs.
+:::
+
+## Preview the Website Locally
+
+Open a terminal in the your repository folder and run:
+
+``` shell
+quarto preview
+```
+
+Quarto will:
+
+-   Render the website
+-   Start a local web server
+-   Open the site in your browser
+-   Watch for saved changes
+-   Refresh the preview while you edit
+
+Use `Ctrl+C` in the terminal to stop the preview server.
+
+## Preview Versus Render {.smaller}
+
+<br>
+
+#### Preview
+
+Best for active editing. It starts a local server and watches for changes.
+
+``` shell
+quarto preview
+```
+
+<br>
+
+#### Render
+
+Builds the complete static website once and writes it to `_site/` by default.
+
+``` shell
+quarto render
+```
+
+<br>
+
+:::{.callout-tip appearance="simple"}
+The `_site/` directory contains the HTML, CSS, JavaScript, images, and other files a web server needs.
+:::
+
+# Break
+
+First Hour Break (5-10 Min?)
+
+## Before We Return
+
+Confirm that you have:
+
+-   Created your own public repository from the template
+-   Cloned your repository locally
+-   Opened the project in your editor or IDE
+-   Successfully run `quarto preview`
+-   Located `_quarto.yml` and the `.qmd` pages
+
+# Hour 2
+
+Customize the Website with GitHub Flow
+
+## Start from an Updated `main`
+
+Before creating a branch:
+
+1.  Switch to `main`
+2.  Fetch or pull from GitHub
+3.  Confirm there are no uncommitted changes
+
+### Terminal check
+
+``` shell
+git status
+git pull
+```
+
+Your branch should start from the latest known version of the default branch.
+
+## Create a Branch
+
+Use a short name that describes the change:
+
+``` text
+customize-site
+update-about-page
+add-projects
+change-site-navigation
+```
+
+### Terminal alternative
+
+``` shell
+git switch -c customize-site
+```
+
+> Avoid treating one branch as a permanent personal workspace. A branch should represent a coherent, finishable change.
+
+## Recommended `_quarto.yml` Changes {.smaller}
+
+Start by personalizing a few high-value settings:
+
+``` yaml
+project:
+  type: website
+
+website:
+  title: "Your Name or Project"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Home
+      - href: projects.qmd
+        text: Projects
+      - href: about.qmd
+        text: About
+  page-footer:
+    left: "Built with Quarto"
+  repo-url: https://github.com/YOUR-USERNAME/YOUR-REPOSITORY
+  repo-actions: [edit, issue]
+
+format:
+  html:
+    theme: cosmo
+    toc: true
+```
+
+## Choose Changes You Can Finish Today
+
+Required changes:
+
+-   Change the website title
+-   Edit (or add) at least one `.qmd` page
+-   Confirm the navigation labels and pages
+-   Choose a theme
+-   Update the repository URL
+
+Optional changes:
+
+-   Add a project entry
+-   Add a profile or project image
+-   Update the footer
+-   Add social or external links
+-   Add another page
+
+> Try for a "complete" website rather than a half-finished redesign.
+
+## Website Inspiration
+
+Useful references:
+
+-   [Quarto Gallery](https://quarto.org/docs/gallery/)
+-   [Website Navigation](https://quarto.org/docs/websites/website-navigation.html)
+-   [HTML Themes](https://quarto.org/docs/output-formats/html-themes.html)
+-   [Website Tools and Footers](https://quarto.org/docs/websites/website-tools.html)
+
+Quarto includes many Bootstrap themes, including:
+
+``` text
+cosmo  flatly  journal  litera  lumen
+minty  pulse   sandstone  sketchy  solar
+```
+
+Try one or two—not all twenty-five 😆 I like `cosmo` for its softer simplicity.
+
+## Add an Image {.smaller}
+
+<br>
+
+Place image files in the `images/` folder.
+
+Reference an image with a relative path:
+
+``` markdown
+![A concise description of the image](images/example.jpg)
+```
+
+Or with Quarto attributes:
+
+``` markdown
+![](images/example.jpg){alt="A concise description" width="60%"}
+```
+
+See [Figures - Quarto Docs]() for more help
+
+
+## Preview While You Edit {.smaller}
+
+<br>
+
+Use Quarto Preview buttons in IDE or Run:
+
+``` shell
+quarto preview
+```
+
+Check that:
+
+-   The YAML parses without errors
+-   Navigation opens the correct pages
+-   Images load
+-   Links work
+-   The theme is readable
+-   No private or unintended information is included before committing and pushing to GitHub
+
+Save frequently and watch the preview refresh.
+
+## Render the Finished Change Locally {.smaller}
+
+<br>
+
+Stop the preview server, then run:
+
+``` shell
+quarto render
+```
+
+Inspect the generated `_site/` directory.
+
+You should see an `index.html` at its top level.
+
+> FYI, `_site/` is ignored by Git in the .gitignore file because it can be recreated from the source files. There is no need to commit it to your repository.
+
+## Review Your Changes Before Committing {.smaller}
+
+In GitHub Desktop or your IDE, review the diff.
+
+Confirm that:
+
+-   Only intended source files changed
+-   `_site/` is not staged
+-   No credentials, tokens, or private data are included
+-   YAML indentation is correct
+-   Large or unnecessary files were not added
+
+### Terminal alternative
+
+``` shell
+git status
+git diff
+```
+
+## Commit the Change
+
+Write a short summary or trust your assistant's slop describing the completed change:
+
+``` text
+Customize website navigation and content
+```
+
+Avoid unhelpful messages such as:
+
+``` text
+updates
+stuff
+GoOfY gOoBeRs
+```
+
+A commit records a meaningful version of your project.
+
+## Push—or Publish—the Branch
+
+Push the branch to GitHub.
+
+### GitHub Desktop
+
+Select **Publish branch** or **Push origin**.
+
+### Terminal alternative
+
+``` shell
+git push -u origin your-new-branch-name
+```
+
+A push transfers your local commits to the matching branch on GitHub.
+
+It does **not** merge the branch into `main`.
+
+## Open a Pull Request {.smaller}
+
+On GitHub:
+
+1.  Select **Compare & pull request**
+2.  Confirm the base branch is `main`
+3.  Confirm the compare branch is your working branch
+4.  Write a useful title
+5.  Briefly describe what changed and how you tested it
+6.  Select **Create pull request**
+
+Example description:
+
+``` markdown
+## Changes
+- Updated the site title and navigation
+- Added project and about content
+- Changed the HTML theme
+
+## Validation
+- Previewed locally with `quarto preview`
+- Rendered successfully with `quarto render`
+```
+
+## Review the Pull Request
+
+Use the pull request as a final checkpoint:
+
+-   Open **Files changed**
+-   Review the complete diff
+-   Confirm the branch can merge
+-   Look for accidental changes
+-   Add a comment or request a review if working with a partner
+
+You can continue committing and pushing to the same branch. The pull request updates automatically.
+
+## Merge and Clean Up
+
+When the change is ready:
+
+1.  Select **Merge pull request**
+2.  Confirm the merge
+3.  Delete the remote branch
+4.  Return to GitHub Desktop
+5.  Switch to `main`
+6.  Pull the merged changes
+7.  Delete the local branch when prompted
+
+Your source of truth is now the updated `main` branch.
+
+# Break
+
+Second Hour Break
+
+## Before We Return
+
+Confirm that you have:
+
+-   Customized the site on a branch
+-   Previewed and rendered it locally
+-   Committed and pushed the source changes
+-   Opened and reviewed a pull request
+-   Merged the pull request into `main`
+-   Updated your local `main` branch
+
+# Hour 3
+
+Automate Publishing with GitHub Actions
+
+## What Are We Publishing?
+
+A Quarto website has two important forms:
+
+```{mermaid}
+%%| fig-width: 7
+%%| fig-align: center
+
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "fontSize": "22px",
+    "fontFamily": "Arial, sans-serif",
+    "primaryTextColor": "#263442",
+    "lineColor": "#64748b"
+  },
+  "flowchart": {
+    "curve": "linear",
+    "rankSpacing": 45,
+    "padding": 18
+  }
+}}%%
+
+flowchart TD
+    A([Source files<br>in Git])
+    B[quarto render]
+    C([Generated static website<br>in _site/])
+
+    A --> B --> C
+
+    classDef source fill:#e8f1f8,stroke:#337795,stroke-width:2px,color:#17394a;
+    classDef process fill:#f7f8fa,stroke:#7b8492,stroke-width:1.5px,color:#263442;
+    classDef output fill:#e8f5ec,stroke:#3f7d54,stroke-width:2px,color:#21452d;
+
+    class A source;
+    class B process;
+    class C output;
+
+    linkStyle default stroke:#64748b,stroke-width:2px;
+```
+
+The generated website is a collection of ordinary files.
+
+It can be opened locally, copied to a web server, stored as an artifact, or committed to a publishing branch.
+
+## Local Rendering Produces the Deployment Files {.smaller}
+
+Run:
+
+``` shell
+quarto render
+```
+
+The `_site/` directory contains the same type of static files we will deploy through GitHub Pages.
+
+Local rendering is useful for:
+
+-   Previewing the exact output
+-   Troubleshooting build failures
+-   Archiving or sharing the generated files
+-   Inspecting the output without storing it in Git history
+
+## Three Publishing Patterns {.smaller}
+
+::: {.fragment}
+#### 1. Local output
+
+Render `_site/` on your computer and copy or package the files yourself.
+:::
+
+::: {.fragment}
+#### 2. GitHub Pages artifact deployment — recommended today
+
+A workflow renders `_site/`, uploads it as a Pages artifact, and deploys it without committing generated files.
+:::
+
+::: {.fragment}
+#### 3. Branch-based deployment
+
+Generated files are committed to `docs/` folder or a publishing branch such as `gh-pages` (This is Quarto's recommended default).
+
+Useful when the rendered files need to be directly visible in Git, but it adds generated content to repository history (Yuck!).
+:::
+
+## Why Prefer Artifact Deployment? {.smaller}
+
+Artifact deployment:
+
+-   Keeps generated HTML out of the source branch(es)
+-   Avoids maintaining a special publishing branch
+-   Reduces noisy diffs and merge conflicts
+-   Separates source control from deployment
+-   Uses a conventional build-and-deploy pipeline
+-   Still lets you inspect the same output locally in `_site/`
+-   Protects you slightly from unintentionally uploading sensitive data
+
+> Use a publishing branch when you have a specific reason to version or directly browse the generated files.
+
+## What Is a Workflow Artifact?
+
+A workflow artifact is a file or collection of files produced during a workflow run.
+
+For this site:
+
+```{mermaid}
+%%| fig-width: 7
+%%| fig-align: center
+
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "fontSize": "22px",
+    "fontFamily": "Arial, sans-serif",
+    "primaryTextColor": "#263442",
+    "lineColor": "#64748b"
+  },
+  "flowchart": {
+    "curve": "linear",
+    "rankSpacing": 42,
+    "padding": 18
+  }
+}}%%
+
+flowchart LR
+    A([GitHub-hosted<br>runner])
+    B[quarto render]
+    C[Generated website<br>in _site/]
+    D[Upload Pages<br>artifact]
+    E([Deploy to<br>GitHub Pages])
+
+    A --> B --> C --> D --> E
+
+    classDef runner fill:#e8f1f8,stroke:#337795,stroke-width:2px,color:#17394a;
+    classDef process fill:#f7f8fa,stroke:#7b8492,stroke-width:1.5px,color:#263442;
+    classDef artifact fill:#fff4df,stroke:#a67524,stroke-width:1.5px,color:#5c431b;
+    classDef deploy fill:#e8f5ec,stroke:#3f7d54,stroke-width:2px,color:#21452d;
+
+    class A runner;
+    class B,D process;
+    class C artifact;
+    class E deploy;
+
+    linkStyle default stroke:#64748b,stroke-width:2px;
+```
+
+The artifact is build output, NOT the source content you edit.
+
+## Configure GitHub Pages
+
+In your personal repository:
+
+1.  Open **Settings**
+2.  Select **Pages**
+3.  Under **Build and deployment**, choose **GitHub Actions**
+
+This tells GitHub Pages to accept deployments from an Actions workflow instead of reading files from a branch and folder.
+
+## GitHub Actions Vocabulary {.smaller}
+
+::: {.fragment}
+#### Workflow
+
+The complete automation defined in a YAML file.
+:::
+
+::: {.fragment}
+#### Event or trigger
+
+What starts the workflow, such as a push or manual run.
+:::
+
+::: {.fragment}
+#### Job
+
+A group of steps that run on the same runner.
+:::
+
+::: {.fragment}
+#### Step
+
+A reusable action or shell command within a job.
+:::
+
+::: {.fragment}
+#### Runner
+
+The temporary computer that executes the job.
+:::
+
+::: {.fragment}
+#### Artifact
+
+Files produced by a workflow and retained outside the Git repository.
+:::
+
+## Adapt the Provided Workflow
+
+The template includes a workflow example. We are adapting a maintained pattern—not building CI/CD from a blank file.
+
+Create:
+
+``` text
+.github/workflows/publish.yml
+```
+
+Then review each section before committing it.
+
+> Workflow files must be inside `.github/workflows/` to run automatically.
+
+## Workflow Name and Triggers
+
+``` yaml
+name: Publish Quarto website
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+```
+
+This workflow can run:
+
+-   Manually from the Actions tab with `workflow dispatch:`
+-   Automatically after a push or merged pull request updates `main`
+
+The workflow does not publish unmerged feature branches.
+
+## Permissions and Concurrency
+
+``` yaml
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+```
+
+-   `contents: read` allows the workflow to read the repository
+-   `pages: write` permits a Pages deployment
+-   `id-token: write` supports deployment identity verification
+-   `concurrency` prevents overlapping Pages deployments
+
+## Build Job
+
+``` yaml
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Quarto
+        uses: quarto-dev/quarto-actions/setup@v2
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Render website
+        run: quarto render
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+```
+
+The build job recreates the same `_site/` output you generated locally.
+
+## Deployment Job
+
+``` yaml
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+```
+
+`needs: build` prevents deployment from starting before the artifact exists.
+
+The `github-pages` environment records and controls the deployment.
+
+## Complete Artifact Deployment Workflow {.smaller}
+
+``` yaml
+name: Publish Quarto website
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+      - name: Set up Quarto
+        uses: quarto-dev/quarto-actions/setup@v2
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+      - name: Render website
+        run: quarto render
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+```
+
+## Add the Workflow Using GitHub Flow
+
+Recommended:
+
+1.  Create a branch named `add-pages-workflow`
+2.  Add `.github/workflows/publish.yml`
+3.  Commit and push the branch
+4.  Open a pull request
+5.  Review the workflow diff
+6.  Merge into `main`
+
+The merge creates a push to `main`, which starts the first automated deployment.
+
+## Inspect the Workflow Run
+
+Open the **Actions** tab and select the newest workflow run.
+
+Look for:
+
+-   The event that started the run
+-   The commit and branch
+-   The `build` job
+-   The `deploy` job
+-   The currently running or failed step
+-   The deployed website URL
+
+Expand each step to inspect its logs.
+
+## Follow the Build from Source to Deployment {.smaller}
+
+### Build job
+
+1.  Check out repository
+2.  Install Quarto
+3.  Configure Pages
+4.  Run `quarto render`
+5.  Upload `_site/` as the Pages artifact
+
+### Deploy job
+
+6.  Retrieve the Pages artifact
+7.  Deploy the static files
+8.  Report the final website URL
+
+A green check on the workflow means the automation completed—not necessarily that every link or sentence on the site is correct.
+
+## Common Failure: Quarto Is Not Installed Locally {.smaller}
+
+Symptom:
+
+``` text
+quarto: command not found
+```
+
+Local fix:
+
+-   Install or update Quarto
+-   Restart your terminal or IDE
+-   Run `quarto --version`
+
+Workflow fix:
+
+-   Confirm the workflow includes `quarto-dev/quarto-actions/setup@v2` before `quarto render`
+
+## Common Failure: YAML Error {.smaller}
+
+Symptoms:
+
+-   Quarto reports an invalid YAML configuration
+-   The workflow does not appear in the Actions tab
+-   GitHub reports a workflow syntax error
+
+Check:
+
+-   Indentation uses spaces
+-   Colons are followed by spaces
+-   Nested values align consistently
+-   Tabs were not inserted
+-   The file is named `.yml` or `.yaml`
+
+## Common Failure: No Pages Artifact {.smaller}
+
+Check that:
+
+-   `quarto render` completed successfully
+-   The site output directory is `_site/`
+-   `_site/index.html` exists
+-   `actions/upload-pages-artifact` points to `_site`
+-   The `deploy` job includes `needs: build`
+
+The uploaded directory must contain `index.html` at the artifact's top level.
+
+## Common Failure: Site Is Not Available {.smaller}
+
+Check:
+
+-   **Settings → Pages** uses **GitHub Actions**
+-   The workflow run completed successfully
+-   The `deploy` job has `pages: write` and `id-token: write`
+-   The repository is public for this workshop
+-   You are opening the URL reported by the deployment step
+
+Initial Pages deployments can take a short time to become available.
+
+## Publish a Second Change {.smaller}
+
+Repeat the full workflow:
+
+1.  Create a branch
+2.  Edit a `.qmd` file
+3.  Preview locally
+4.  Commit and push
+5.  Open and review a pull request
+6.  Merge into `main`
+7.  Watch the Actions workflow
+8.  Refresh the deployed website
+
+After setup, publishing becomes a normal consequence of merging a reviewed source change.
+
+## Branch-Based Publishing Alternative {.smaller}
+
+Two common branch patterns are:
+
+### Commit rendered files to `docs/` on `main`
+
+``` yaml
+project:
+  type: website
+  output-dir: docs
+```
+
+Configure Pages to publish from `main` and `/docs`.
+
+### Publish generated output to `gh-pages`
+
+``` shell
+quarto publish gh-pages
+```
+
+Both patterns expose generated files in Git. This can be useful, but generated changes can add repository size, noisy diffs, and extra branch maintenance.
+
+## Choosing a Publishing Pattern {.smaller}
+
+Use **artifact deployment** when:
+
+-   Git stores source and automation
+-   Generated files should not be committed
+-   You want a clean, maintainable CI/CD pattern
+
+Use **branch-based deployment** when:
+
+-   Another system expects files in a branch or directory
+-   Generated output must be browsable or versioned in Git
+-   Artifact deployment is unavailable
+
+Use **local rendering** whenever you need to inspect or package the generated website directly.
+
+## Wrap-Up {.smaller}
+
+Today you:
+
+-   Applied GitHub Flow to a real project
+-   Created a repository from a template
+-   Customized and rendered a Quarto website
+-   Used a branch and pull request to manage content
+-   Distinguished source files from generated website files
+-   Adapted a GitHub Actions workflow
+-   Published a Pages artifact without a publishing branch
+-   Inspected workflow jobs, steps, logs, artifacts, and deployments
+
+<br>
+
+The same pattern can support portfolios, documentation, project sites, reports, and training resources.
+
+## Resources {.smaller}
+
+### GitHub
+
+-   [GitHub Flow](https://docs.github.com/en/get-started/using-github/github-flow)
+-   [Creating a repository from a template](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template)
+-   [Creating a pull request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request)
+-   [GitHub Actions Quickstart](https://docs.github.com/en/actions/get-started/quickstart)
+-   [Workflow artifacts](https://docs.github.com/en/actions/concepts/workflows-and-actions/workflow-artifacts)
+-   [Custom GitHub Pages workflows](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages)
+
+### Quarto
+
+-   [Quarto Get Started](https://quarto.org/docs/get-started/)
+-   [Quarto Websites](https://quarto.org/docs/websites/)
+-   [Quarto Gallery](https://quarto.org/docs/gallery/)
+-   [HTML Themes](https://quarto.org/docs/output-formats/html-themes.html)
+-   [GitHub Pages publishing](https://quarto.org/docs/publishing/github-pages.html)
+-   [Publishing with CI](https://quarto.org/docs/publishing/ci.html)
