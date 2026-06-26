@@ -26,7 +26,7 @@ This repository contains the instructions and slides for the 2026 Intermediate G
 
 You can access the rendered workshop slides here:
 
-- [Add link here]
+- <https://cascadiarconf-gh-workshops.github.io/intermediate-practical-publishing/>
 
 <br>
 
